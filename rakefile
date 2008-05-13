@@ -1,0 +1,55 @@
+#-*- ruby -*-
+
+require 'rubygems'
+require 'rake'
+require 'rake/packagetask'
+require 'rake/gempackagetask'
+require 'rake/contrib/rubyforgepublisher'
+
+PKG_NAME    = 'pcanusb'
+PKG_VERSION = '0.0.1'
+
+# Create compressed packages
+dist_dirs = [ 'lib' ]
+
+spec = Gem::Specification.new do |s|
+  s.platform = Gem::Platform::RUBY
+  s.name = PKG_NAME
+  s.version = PKG_VERSION
+  s.summary = 'PCAN DLL wrapper'
+  s.description = <<EOF
+PCAN is a Controller Area Network (CAN) device that connects to a PC via USB. 
+It ships with a DLL and documented API. 
+This is a Ruby wrapper for that API allowing CAN messages to be sent and received from Ruby.
+EOF
+
+#  s.has_rdoc = true
+  s.requirements << 'none'
+
+#  s.add_dependency('activesupport', '= 1.4.2' + PKG_BUILD)
+
+  s.require_path = 'lib'
+  s.autorequire = 'rake'
+
+  s.files = [ "rakefile" ]
+  dist_dirs.each do |dir|
+    s.files = s.files + Dir.glob( "#{dir}/**/*" ).delete_if { |item| item.include?( "\.svn" ) }
+  end
+end
+
+Rake::GemPackageTask.new(spec) do |pkg|
+  pkg.gem_spec = spec
+  pkg.need_zip = true
+#  pkg.need_tar = true
+end
+
+desc "Publish the release files to RubyForge."
+task :release => [ :package ] do
+  require 'rubyforge'
+
+  packages = %w( gem zip ).collect{ |ext| "pkg/#{PKG_NAME}-#{PKG_VERSION}.#{ext}" }
+
+  rubyforge = RubyForge.new
+  rubyforge.login
+  rubyforge.add_release(PKG_NAME, PKG_NAME, "REL #{PKG_VERSION}", *packages)
+end
