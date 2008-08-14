@@ -6,7 +6,7 @@ require "dl"
 require "dl/import"
 require "dl/struct"
 
-class PCAN_USB
+class PCANUSB
 
   # BAUD rates used by "init"
   BAUD_1M   = 0x0014
@@ -49,6 +49,10 @@ class PCAN_USB
   CAN_ILLPARAMTYPE   = 0x4000  # Parameter is not permitted/applicable here.
   CAN_ILLPARAMVAL    = 0x8000  # Parameter value is invalid.
 
+  # Initialize the PCAN device with a BAUD rate and message type.
+  # Valid message types are
+  # * CAN_INIT_TYPE_ST:: Standard format IDs
+  # * CAN_INIT_TYPE_EX:: Extended IDs
   def self.init(baud_value, message_type = CAN_INIT_TYPE_EX)
     err = Core::cAN_Init(baud_value, message_type)
     
@@ -58,14 +62,18 @@ class PCAN_USB
     return err
   end
 
+  # Close the PCAN device connection.
   def self.close
     return Core::cAN_Close
   end
-  
+
+  # Retrieve the current PCAN status.  
   def self.status
     return Core::cAN_Status
   end
-  
+
+  # Initiates a transmission of a CAN message with a given ID.
+  # the data parameter is expected to be less than 8 bytes.  
   def self.write(id, data, message_type = MSGTYPE_EXTENDED)
     message = Core::TPCANMsg.malloc
     message.id = id
@@ -84,6 +92,8 @@ class PCAN_USB
     return Core::cAN_MsgFilter(fromID, toID, message_type)
   end
   
+  # Read one CAN message from the PCAN FIFO.
+  # Returns the error code, message type, ID and data array.
   def self.read
     message = Core::TPCANMsg.malloc
     
@@ -92,6 +102,8 @@ class PCAN_USB
     return err, message.message_type, message.id, message.data[0..message.length - 1]
   end
 
+  # Read a message with a given ID.
+  # Returns the received data array if the required ID is received within the timeout or false if not.
   def self.read_id(id, timeout=1)
     read_timeout = Time.now + timeout
   
@@ -106,10 +118,12 @@ class PCAN_USB
     return false
   end
   
+  # Reset the PCAN device.
   def self.reset_client
     return Core::cAN_ResetClient
   end
 
+  # Provide information about the PCAN.
   def self.version_info
     info = Core::Version_Info.malloc
     
@@ -118,7 +132,8 @@ class PCAN_USB
     # info.value is an array of characters, convert it to string 
     return info.value.pack("c128")
   end
-  
+
+  # Return the device number associated with the connected PCAN.  
   def self.get_usb_device_number
     number = Core::Device_Number.malloc
     
@@ -126,8 +141,10 @@ class PCAN_USB
     
     return err, number.value
   end
-  
-  module Core
+   
+  #-----
+
+  module Core #:nodoc:all
     extend DL::Importable
     
     dlload File.dirname(__FILE__) + "/Pcan_usb.dll"

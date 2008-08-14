@@ -4,10 +4,11 @@ require 'rubygems'
 require 'rake'
 require 'rake/packagetask'
 require 'rake/gempackagetask'
+require 'rake/rdoctask'
 require 'rake/contrib/rubyforgepublisher'
 
 PKG_NAME    = 'pcanusb'
-PKG_VERSION = '0.0.1'
+PKG_VERSION = '1.0.0'
 
 # Create compressed packages
 dist_dirs = [ 'lib' ]
@@ -23,10 +24,8 @@ It ships with a DLL and documented API.
 This is a Ruby wrapper for that API allowing CAN messages to be sent and received from Ruby.
 EOF
 
-#  s.has_rdoc = true
+  s.has_rdoc = true
   s.requirements << 'none'
-
-#  s.add_dependency('activesupport', '= 1.4.2' + PKG_BUILD)
 
   s.require_path = 'lib'
   s.autorequire = 'rake'
@@ -40,7 +39,6 @@ end
 Rake::GemPackageTask.new(spec) do |pkg|
   pkg.gem_spec = spec
   pkg.need_zip = true
-#  pkg.need_tar = true
 end
 
 desc "Publish the release files to RubyForge."
@@ -52,4 +50,9 @@ task :release => [ :package ] do
   rubyforge = RubyForge.new
   rubyforge.login
   rubyforge.add_release(PKG_NAME, PKG_NAME, "REL #{PKG_VERSION}", *packages)
+end
+
+Rake::RDocTask.new do |rd|
+  rd.main = "lib/pcanusb.rb"
+  rd.rdoc_files.include("lib/**/*.rb")
 end
