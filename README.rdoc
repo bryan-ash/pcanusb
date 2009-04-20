@@ -1,0 +1,48 @@
+= PCANUSB - PCAN DLL Wrapper
+
+PCAN is a Controller Area Network (CAN) device that connects to a PC via USB. It ships with a DLL and documented API. This is a Ruby wrapper for that API allowing CAN messages to be sent and received from Ruby.
+
+
+== Example Usage
+
+  err = PCANUSB.init(PCANUSB::BAUD_250K)
+  raise INITIALIZATION_ERROR if err != PCANUSB::CAN_OK
+
+  err, number = PCANUSB.get_usb_device_number
+  puts "\n\nUsing PCAN USB device number = " + number.to_s(base=16)
+
+  err = PCANUSB.set_receive_filter(0x0E000000, 0x0EFFFFFF)
+  raise RECEIVE_FILTER_ERROR if err != PCANUSB::CAN_OK
+
+  err = PCANUSB.write(TRANSMIT_ID,[1, 2, 3, 4] )
+  raise WRITE_ERROR if err != PCANUSB::CAN_OK
+
+  assert_equal [5, 6, 7, 8], PCANUSB.read_id(RECEIVE_ID)
+
+  PCANUSB.close
+
+
+== License
+
+Copyright (c) 2009 Bryan Ash
+
+Permission is hereby granted, free of charge, to any person
+obtaining a copy of this software and associated documentation
+files (the "Software"), to deal in the Software without
+restriction, including without limitation the rights to use,
+copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
