@@ -145,7 +145,11 @@ class PCANUSB
   #-----
 
   module Core #:nodoc:all
-    extend DL::Importable
+    if RUBY_VERSION <= "1.8.7"
+      extend DL::Importable
+    else
+      extend DL::Importer
+    end
     
     dlload File.dirname(__FILE__) + "/Pcan_usb.dll"
     
