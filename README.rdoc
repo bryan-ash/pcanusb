@@ -7,18 +7,18 @@ PCAN is a Controller Area Network (CAN) device that connects to a PC via USB. It
 
   err = PCANUSB.init(PCANUSB::BAUD_250K)
   raise INITIALIZATION_ERROR if err != PCANUSB::CAN_OK
-
+  
   err, number = PCANUSB.get_usb_device_number
   puts "\n\nUsing PCAN USB device number = " + number.to_s(base=16)
-
+  
   err = PCANUSB.set_receive_filter(0x0E000000, 0x0EFFFFFF)
   raise RECEIVE_FILTER_ERROR if err != PCANUSB::CAN_OK
-
+  
   err = PCANUSB.write(TRANSMIT_ID,[1, 2, 3, 4] )
   raise WRITE_ERROR if err != PCANUSB::CAN_OK
-
+  
   assert_equal [5, 6, 7, 8], PCANUSB.read_id(RECEIVE_ID)
-
+  
   PCANUSB.close
 
 
